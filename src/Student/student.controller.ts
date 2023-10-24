@@ -13,6 +13,7 @@ export class AppController {
     @Body('address') address: String,
     @Body('number') number: number
     ): any {
-      this.studentService.AddAStudent(f_name,l_name,dob,address,number);
+      const generateID = this.studentService.AddAStudent(f_name,l_name,dob,address,number);
+      return {id: generateID };
   }
 }

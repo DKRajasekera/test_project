@@ -1,61 +1,119 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { Student } from './student.modul';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { Repository } from 'typeorm';
+
+import { Student } from './student.entity';
+
+ 
+
 @Injectable()
+
 export class StudentService {
-  private student : Student [] = [];
 
-  AddAStudent(F_name: String, L_name: String, dob: String, adress: String, number: number) {
-    const stuID = Math.random().toString()
-    const newStudent = new Student(stuID, F_name, L_name, dob, adress, number)
-    this.student.push(newStudent)
-    return stuID
+  constructor(
+
+    @InjectRepository(Student)
+
+    private studentRepository: Repository<Student>,
+
+  ) {}
+
+ 
+
+  async addAStudent(fName: string, lName: string, dob: string, address: string, age: number): Promise<Student> {
+
+    const newStudent = this.studentRepository.create({
+
+      FName: fName,
+
+      LName: lName,
+
+      DOB: dob,
+
+      Address: address,
+
+      age: age,
+
+    });
+
+ 
+
+    await this.studentRepository.save(newStudent);
+
+    return newStudent;
+
   }
 
-  GetStudents() {
-    return [...this.student];
+ 
+
+  async getStudents(): Promise<Student[]> {
+
+    return this.studentRepository.find();
+
   }
 
-  FindStudent(studentId) {
-    const student = this.student.find((stu) => stu.id === studentId);
-    if(!student){
-      throw new NotFoundException('Could not found that student');
-    }
-    return {...student}
-  }
+ 
 
-  UpdateStudent(studentId, F_name: string, L_name: string, dob: string, address: string, number: number) {
-    const { student, studentIndex } = this.FindStudentIndex(studentId);
-    const updatedStudent = { ...student };
-    if (F_name) {
-      updatedStudent.FirstName = F_name;
-    }
-    if (L_name) {
-      updatedStudent.LastName = L_name;
-    }
-    if (dob) {
-      updatedStudent.DOB = dob;
-    }
-    if (address) {
-      updatedStudent.Address = address;
-    }
-    if (number) {
-      updatedStudent.Number = number;
-    }
-    this.student[studentIndex] = updatedStudent;
-  }
+  async findStudent(studentId: number): Promise<Student> {
 
-  FindStudentIndex(studentId): { student: Student; studentIndex: number } {
-    const studentIndex = this.student.findIndex((stu) => stu.id === studentId);
-    const student = this.student[studentIndex];
-    if (!student) {
+    try {
+
+      // Using an options object with a where clause
+
+      return await this.studentRepository.findOneOrFail({ where: { id: studentId } });
+
+    } catch (error) {
+
       throw new NotFoundException('Could not find that student');
+
     }
-    return { student, studentIndex };
+
   }
 
-  DeleteStudent(studentId) {
-    const index = this.FindStudentIndex(studentId).studentIndex;
-    this.student.splice(index, 1);
+ 
+
+ 
+
+  async updateStudent(studentId: number, fName: string, lName: string, dob: string, address: string, age: number): Promise<Student> {
+
+    const student = await this.findStudent(studentId);
+
+ 
+
+    student.FName = fName || student.FName;
+
+    student.LName = lName || student.LName;
+
+    student.DOB = dob || student.DOB;
+
+    student.Address = address || student.Address;
+
+    student.age = age || student.age;
+
+ 
+
+    await this.studentRepository.save(student);
+
+    return student;
+
   }
+
+ 
+
+  async deleteStudent(studentId: number): Promise<void> {
+
+    const result = await this.studentRepository.delete(studentId);
+
+ 
+
+    if (result.affected === 0) {
+
+      throw new NotFoundException('Could not find the student to delete');
+
+    }
+
+  }
+
 }

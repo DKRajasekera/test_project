@@ -1,6 +1,6 @@
-export class Student {
+export class Student{
     constructor (
-        public id : String,
+        public id : number,
         public FirstName : String,
         public LastName : String,
         public DOB : String,

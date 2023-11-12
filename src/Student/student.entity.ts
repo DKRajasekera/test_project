@@ -10,31 +10,21 @@ export class Student {
 
   id: number;
 
- 
-
   @Column({ type: 'varchar' })
 
   FName: string;
 
- 
-
   @Column({ type: 'varchar' })
 
   LName: string;
-
  
-
   @Column({ type: 'varchar' })
 
   DOB: string;
 
- 
-
   @Column({ type: 'varchar' })
 
   Address: string;
-
- 
 
   @Column({ type: 'int' })
 
